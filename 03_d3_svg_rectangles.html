@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min.js"></script>
+</head>
+<body>
+    
+    <div id="canvas">
+        
+    </div>
+    
+    <script>
+        var data = [
+        450, 100, 100, 279, 500, 25, 350, 120, 80, 130,
+        110, 102, 375, 200, 175, 168, 180, 230, 205,
+        ];
+        
+        barPadding = 2
+        barWidth = 30
+        
+        var across = [30,60,90,120,150]
+        
+        var svg = d3.select("#canvas")
+            .append("svg")
+            .attr("width", 700)
+            .attr("height", 500);
+            
+        svg.selectAll("rect")
+            .data(data)
+            .enter()
+            .append("rect")
+            .attr("width", barWidth - barPadding)
+            .attr("height", function(d){
+                return d
+            })
+            .attr("x", function(d, i){
+                return 50 + (i * barWidth);
+            })
+            .attr("y", function(d){
+                return 500 - d;
+            });
+
+        
+    
+    </script>
+    
+</body>
+</html>
