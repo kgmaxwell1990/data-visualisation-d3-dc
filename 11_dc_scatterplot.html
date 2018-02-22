@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>D3 and Scalable Vector Graphics</title>
+
+
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/dc/2.1.8/dc.min.css"/>
+
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/crossfilter/1.3.12/crossfilter.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/dc/2.1.8/dc.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/queue-async/1.0.7/queue.min.js"></script>
+
+</head>
+<body>
+    <div id="chart-here"></div>
+
+
+    <script>
+    
+    queue()
+        .defer(d3.json, "data/transactions.json")
+        .await(makeGraphs)
+        
+
+    function makeGraphs(error, transactionsData){
+        let ndx = crossfilter(transactionsData)
+        console.log(transactionsData)
+        
+        let parseDate = d3.time.format("%d/%m/%Y").parse;
+        transactionsData.forEach(function(d){
+            d.date = parseDate(d.date);
+        });
+        
+        let dateDim = ndx.dimension(dc.pluck("date"));
+        
+        let minDate = dateDim.bottom(1)[0].date;
+        let maxDate = dateDim.top(1)[0].date;
+        
+        let spendDim = ndx.dimension(function(d){
+            return [d.date, d.spend, d.name];
+        });
+        
+        let spendGroup = spendDim.group();
+        
+        
+        let buyerColors = d3.scale.ordinal()
+            .domain(["Alice", "Bob", "Tom"])
+            .range(["red", "green", "blue"])
+        
+        
+        
+        dc.scatterPlot("#chart-here")
+            .height(500)
+            .width(800)
+            .dimension(spendDim)
+            .group(spendGroup)
+            .x(d3.time.scale().domain([minDate,maxDate]))
+            .transitionDuration(500)
+            .colors(buyerColors)
+            .colorAccessor(function(d){
+                return d.key[2];
+            })
+            .title(function(d){
+                return d.key[2] + " spent €" + d.key[1] + " on " + d.key[0]
+            })
+            .brushOn(false)
+            .symbolSize(8)
+            .yAxisLabel("Amount Spent")
+            .clipPadding(10)
+        
+        dc.renderAll();
+    }
+    
+    
+
+    </script>
+    
+    
+</body>
+</html>
